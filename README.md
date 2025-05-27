@@ -5,7 +5,6 @@ This project aims to analyze the adoption of digital payment systems in the Suma
 
 ## 📚 **Project Overview**
 This project includes:
-- Batch Pipeline: Medallion Architecture (Bronze → Silver → Gold) for historical digital payment data.
 - Analytical Modeling: Trend analysis & regional adoption patterns using Apache Spark & Hive.
 - Data Integration: Combining national and regional e-money datasets from Bank Indonesia.
 - Visualization & Reporting: Interactive dashboard via Apache Superset for policy decision-making.
