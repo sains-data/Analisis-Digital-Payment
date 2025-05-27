@@ -1,0 +1,35 @@
+﻿version: '3'
+
+services:
+  superset:
+    image: apache/superset:latest
+    container_name: superset
+    restart: always
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=your_secret_key_here
+      - SUPERSET_LOAD_EXAMPLES=false
+      - PYTHONPATH=/app/pythonpath:/app/superset_init
+      - WTF_CSRF_ENABLED=false
+      - SUPERSET_WEBSERVER_ADDRESS=0.0.0.0
+    volumes:
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+      - ./superset/init:/app/superset_init
+      - superset_home:/app/superset_home
+    command: >
+      bash -c "
+        superset db upgrade &&
+        superset fab create-admin --username admin --firstname Superset --lastname Admin --email admin@superset.com --password admin --force &&
+        superset init &&
+        gunicorn --bind 0.0.0.0:8088 --workers 2 --worker-class gthread --threads 20 --timeout 60 'superset.app:create_app()'
+      "
+    networks:
+      - hadoop
+
+volumes:
+  superset_home:
+
+networks:
+  hadoop:
+    external: true

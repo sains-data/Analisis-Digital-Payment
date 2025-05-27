@@ -1,0 +1,35 @@
+version: '3.7'
+
+services:
+  superset:
+    build:
+      context: .
+      dockerfile: Dockerfile.superset
+    container_name: superset
+    restart: always
+    ports:
+      - "8088:8088"
+    environment:
+      - SUPERSET_SECRET_KEY=CHANGE_THIS_TO_SOMETHING_COMPLEX
+      - SUPERSET_LOAD_EXAMPLES=false
+      - PYTHONPATH=/app/pythonpath:/app/superset_init
+      - WTF_CSRF_ENABLED=false
+    volumes:
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py
+      - ./superset/init:/app/superset_init
+      - superset_home:/app/superset_home
+    command: >
+      bash -c "
+        /app/superset_init/total_fix.sh &&
+        gunicorn --bind 0.0.0.0:8088 --workers 2 --worker-class gthread --threads 20 --timeout 60 'superset.app:create_app()'
+      "
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8088/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
+volumes:
+  superset_home:
+    driver: local
